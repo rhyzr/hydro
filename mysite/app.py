@@ -130,9 +130,12 @@ def create_chat_room():
 
     if request.method == 'POST':
         room_name = request.form['room_name']
-        password = request.form['password']
 
-        chat_rooms.append({'name': room_name, 'password': password, 'messages': []})
+        for room in chat_rooms:
+            if room['name'] == room_name:
+                return render_template('create_chat_room.html', error='Room with this name already exists')
+
+        chat_rooms.append({'name': room_name, 'messages': []})
 
         with open('chat_rooms.json', 'w') as f:
             json.dump(chat_rooms, f, indent=4)
