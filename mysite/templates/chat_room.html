@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hydro - {{ room['name'] }}</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function replaceEmojis(message) {
+                var emojis = {
+                    ":joy:": "😂",
+                    ":heart:": "❤️",
+                    ":heart_eyes:": "😍",
+                    ":fire:": "🔥",
+                    ":thumbsup:": "👍",
+                    ":thumbsdown:": "👎",
+                    ":clap:": "👏",
+                    ":100:": "💯",
+                    ":sob:": "😭",
+                    ":ok_hand:": "👌",
+                    ":muscle:": "💪",
+                    ":pray:": "🙏",
+                    ":raised_hands:": "🙌",
+                    ":heartpulse:": "💗",
+                    ":sparkling_heart:": "💖",
+                    ":heart_eyes_cat:": "😻",
+                };
+
+                Object.keys(emojis).forEach(function(emojiCommand) {
+                    var emojiUnicode = emojis[emojiCommand];
+                    var emojiRegex = new RegExp(emojiCommand.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g');
+                    message = message.replace(emojiRegex, emojiUnicode);
+                });
+
+                return message;
+            }
+
+            function refreshMessages() {
+                $.ajax({
+                    type: 'GET',
+                    url: '/get_messages/{{ room_id }}',
+                    success: function(data) {
+                        var shouldScroll = $('#messages').scrollTop() + $('#messages').innerHeight() >= $('#messages')[0].scrollHeight;
+
+                        $('#messages').html('');
+                        data.forEach(function(message) {
+                            if (!isCommand(message.message)) {
+                                var formattedMessage = '<li><strong>' + message.username + ':</strong> ' + replaceEmojis(message.message) + '</li>';
+                                $('#messages').append(formattedMessage);
+                            }
+                        });
+
+                        if (shouldScroll) {
+                            scrollToBottom();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                    }
+                });
+            }
+
+            function scrollToBottom() {
+                $('#messages').scrollTop($('#messages')[0].scrollHeight);
+            }
+
+            $('#message-form').submit(function(e) {
+                e.preventDefault();
+                var message = $('#message').val();
+                if (message.trim() !== '') {
+                    $.ajax({
+                        type: 'POST',
+                        url: '{{ url_for("chat_room", room_id=room_id) }}',
+                        data: {message: message},
+                        success: function(response) {
+                            $('#message').val('');
+                            refreshMessages();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                        }
+                    });
+                }
+            });
+
+            setInterval(refreshMessages, 100);
+            refreshMessages();
+            scrollToBottom();
+
+            $('#message').keydown(function(e) {
+                if (e.keyCode === 13) {
+                    var command = $(this).val().trim();
+                    if (command === '/back') {
+                        window.location.href = '{{ url_for("chat_room_list") }}';
+                    } else if (command === '/exit') {
+                        window.location.href = '{{ url_for("index") }}';
+                    }
+                }
+            });
+
+            function isCommand(message) {
+                return message.startsWith('/') && (message === '/back' || message === '/exit');
+            }
+        });
+    </script>
+    <style>
+        body {
+            font-family: Consolas, monospace;
+            background-color: #000;
+            color: #0F0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            font-family: 'Arial Black', sans-serif;
+            color: #00FF00;
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .terminal-container {
+            background-color: #000;
+            padding: 10px;
+            border: 2px solid #0F0;
+            border-radius: 5px;
+            width: 600px;
+            margin: 0 auto;
+        }
+        input[type="text"] {
+            background-color: #000;
+            color: #0F0;
+            border: none;
+            outline: none;
+            width: calc(100% - 22px);
+            padding: 5px;
+            font-family: Consolas, monospace;
+            margin-bottom: 10px;
+        }
+        .command-description {
+            color: #0F0;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ room['name'] }}</h1>
+    <ul id="messages">
+        
+    </ul>
+    <form id="message-form" autocomplete="off">
+        <input type="text" id="message" name="message" placeholder="Type your message..." required>
+    </form>
+</body>
+</html>

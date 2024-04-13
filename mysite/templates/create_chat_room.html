@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hydro - Create Room</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <style>
+        body {
+            font-family: Consolas, monospace;
+            background-color: #000;
+            color: #0F0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            font-family: 'Arial Black', sans-serif;
+            color: #00FF00;
+            text-align: center;
+        }
+        .terminal-container {
+            background-color: #000;
+            padding: 10px;
+            border: 2px solid #0F0;
+            border-radius: 5px;
+            width: 300px;
+            margin: 0 auto;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .input-container {
+            margin-bottom: 10px;
+        }
+        label {
+            color: #0F0;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        input[type="password"] {
+            background-color: #000;
+            color: #0F0;
+            border: none;
+            outline: none;
+            width: 100%;
+            padding: 5px;
+            font-family: Consolas, monospace;
+        }
+        .error-message {
+            color: red;
+            margin-top: 5px;
+        }
+        .commands {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hydro - Create Room</h1>
+    <div class="terminal-container">
+        <div class="commands">
+            Available Commands:
+            <p>Press <strong>1</strong> to create your room</p>
+            <p>Press <strong>2</strong> to go back</p>
+        </div>
+        <form id="create-room-form" action="{{ url_for('create_chat_room') }}" method="POST">
+            <div class="input-container">
+                <label for="room_name">Room Name:</label>
+                <input type="text" name="room_name" id="room_name" placeholder="Enter room name" autocomplete="off" required>
+                <span class="error-message" id="name-error"></span>
+            </div>
+            <div class="input-container">
+                <label for="command">Enter command:</label>
+                <input type="text" name="command" id="command" placeholder="Enter command" autocomplete="off" required>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('command').addEventListener('input', function() {
+            var command = this.value.trim();
+            var roomName = document.getElementById('room_name').value.trim();
+
+            if (command === '1' && roomName !== '') {
+                document.getElementById('create-room-form').submit();
+            } else if (command === '2') {
+                window.location.href = "{{ url_for('index') }}";
+            }
+        });
+
+        document.getElementById('room_name').addEventListener('input', function() {
+            var roomName = this.value.trim();
+            var existingRooms = [
+                {% for room in chat_rooms %}
+                    "{{ room['name'] }}",
+                {% endfor %}
+            ];
+
+            if (existingRooms.includes(roomName)) {
+                document.getElementById('name-error').innerText = 'Room with this name already exists';
+                document.getElementById('create-room-form').setAttribute('data-invalid', 'true');
+            } else {
+                document.getElementById('name-error').innerText = '';
+                document.getElementById('create-room-form').removeAttribute('data-invalid');
+            }
+        });
+    </script>
+</body>
+</html>

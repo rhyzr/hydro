@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hydro - Home</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <style>
+        body {
+            font-family: Consolas, monospace;
+            background-color: #000;
+            color: #0F0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            font-family: 'Arial Black', sans-serif;
+            color: #00FF00;
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .terminal-container {
+            background-color: #000;
+            padding: 10px;
+            border: 2px solid #0F0;
+            border-radius: 5px;
+            width: 300px;
+            margin: 0 auto;
+        }
+        input[type="text"] {
+            background-color: #000;
+            color: #0F0;
+            border: none;
+            outline: none;
+            width: 100%;
+            padding: 5px;
+            font-family: Consolas, monospace;
+        }
+        .command-description {
+            color: #0F0;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hydro - Home</h1>
+    <div class="terminal-container">
+        <div class="command-description">
+            Available commands:
+            <ul>
+                <li>Press <strong>1</strong> to view the room list</li>
+                <li>Press <strong>2</strong> to create a new chat room</li>
+                <li>Press <strong>3</strong> to logout</li>
+            </ul>
+        </div>
+        <form id="terminal-form" action="#">
+            <label for="command">Enter command:</label>
+            <input type="text" id="command" name="command" placeholder="Enter command" autocomplete="off" autofocus>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('command').addEventListener('keydown', function(event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                var commandInput = document.getElementById('command');
+                var command = commandInput.value.trim();
+
+                switch (command) {
+                    case '1':
+                        window.location.href = "{{ url_for('chat_room_list') }}";
+                        break;
+                    case '2':
+                        window.location.href = "{{ url_for('create_chat_room') }}";
+                        break;
+                    case '3':
+                        window.location.href = "{{ url_for('logout') }}";
+                        break;
+                    default:
+                        alert('Invalid command. Please enter a valid command (1, 2, or 3).');
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
