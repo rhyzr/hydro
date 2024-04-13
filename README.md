@@ -1,6 +1,6 @@
-# Hydro Chat Application
+# Hydro V2
 
-Hydro is a simple chat application built with Flask and Socket.IO. It allows users to create chat rooms, join existing rooms, and communicate with other users in real-time.
+Hydro V2 is a simple chat application built with Flask and Socket.IO. It allows users to create chat rooms, join existing rooms, and communicate with other users in real-time.
 
 ## Features
 
